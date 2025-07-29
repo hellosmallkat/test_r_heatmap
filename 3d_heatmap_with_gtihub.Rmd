@@ -1,0 +1,164 @@
+---
+title: "3d github"
+output: html_document
+date: "2025-07-29"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+library(lubridate)
+library(akima)
+library(plotly)
+library(stringr)
+library(tidyr)
+library(dplyr)
+
+
+```
+
+```{r}
+data <- read.csv("C:\\Users\\Kat\\Desktop\\Fun\\Scraping\\fake_healthcare_dataset.csv")
+```
+
+```{r}
+print(data)
+unique(data$Healthcare_Code)
+```
+```{r}
+group_HC202 <- data %>%
+  filter(Healthcare_Code == 'HC202')
+print(group_HC202)
+group_HC505 <- data %>%
+  filter(Healthcare_Code == 'HC505')
+group_HC303 <- data %>%
+  filter(Healthcare_Code == 'HC303')
+group_HC404 <- data %>%
+  filter(Healthcare_Code == 'HC404')
+group_HC606 <- data %>%
+  filter(Healthcare_Code == 'HC606')
+group_HC707 <- data %>%
+  filter(Healthcare_Code == 'HC707')
+group_HC101 <- data %>%
+  filter(Healthcare_Code == 'HC101')
+```
+
+```{r}
+filterd_group_HC202 <- group_HC202 %>%
+  select(Name, Healthcare_Code, Appointment_Date) %>%
+  rename(code = Healthcare_Code, date = Appointment_Date) %>%
+  filter(!is.na(code) & code != "")
+
+filterd_group_HC202$date <- as.Date(filterd_group_HC202$date, format = "%Y-%m-%d")
+
+filterd_group_HC202 <- filterd_group_HC202 %>%
+  mutate(
+    Month = floor_date(date, unit = "month")
+  )
+today <- Sys.Date()
+end_date <- ceiling_date(today, unit = "month") + months(4)
+filterd_group_HC202 <- filterd_group_HC202 %>%
+  filter(Month >= floor_date(today, unit = "month") & Month <= end_date)
+
+monthly_counts <- filterd_group_HC202 %>%
+  group_by(Name, Month) %>%
+  summarise(code_count = n_distinct(code), .groups = "drop") %>%
+  mutate(
+    name_index = as.numeric(factor(Name)),
+    Month_index = as.numeric(factor(Month)),
+    name_label = factor(Name),
+    Month_label = factor(Month)
+  )
+
+all_combinations <- expand.grid(
+  name_index = unique(monthly_counts$name_index),
+  Month_index = unique(monthly_counts$Month_index)
+)
+
+name_levels <- levels(monthly_counts$name_label)
+month_levels <- levels(monthly_counts$Month_label)
+
+all_combinations <- expand.grid(
+  name_index = seq_along(name_levels),
+  Month_index = seq_along(month_levels)
+)
+
+monthly_counts_complete <- all_combinations %>%
+  left_join(monthly_counts, by = c("name_index", "Month_index")) %>%
+  mutate(
+    code_count = ifelse(is.na(code_count), 0, code_count),
+    name_label = factor(name_index, labels = name_levels),
+    Month_label = factor(Month_index, labels = month_levels)
+  )
+
+unique(monthly_counts_complete$name_index)
+unique(monthly_counts_complete$Month_index)
+
+
+interp_results <-with(monthly_counts_complete, akima::interp(
+  x = name_index,
+  y = Month_index,
+  z = code_count,
+  xo = seq(min(name_index), max(name_index), length = 50),
+  yo = seq(min(Month_index), max(Month_index), length = 50),
+  linear = TRUE
+))
+
+z_matrix <- interp_results$z
+z_matrix[is.na(z_matrix)] <- 0
+z_matrix <- round(pmax(z_matrix, 0))
+
+hover_text <- matrix("", nrow = nrow(z_matrix), ncol = ncol(z_matrix))
+for(i in 1:nrow(z_matrix)) {
+  for(j in 1:ncol(z_matrix)) {
+    month_index <- round(seq(1, length(month_levels), length.out = nrow(z_matrix)))[i]
+    qa_index <- round(seq(1, length(name_levels), length.out = ncol(z_matrix)))[j]
+    
+    hover_text[i, j] <- paste0(
+      "Month: ", month_levels[month_index], "<br>",
+      "Name: ", name_levels[qa_index], "<br>",
+      "Count: ", round(z_matrix[i, j], 15)
+    )
+  }
+}
+
+
+fig <- plot_ly(
+  x = interp_results$x,
+  y = interp_results$y,
+  z = interp_results$z,
+  type = "surface",
+  colorscale = list(list(0, "blue"), list(15,"red")),
+  text = hover_text,
+  hoverinfo = "text",
+  contour = list(z = list(show = TRUE, usecolormap = TRUE, hightlightcolor = "#ff0000", project = list(z = TRUE)))
+) %>%
+  layout(
+    title = "3D heatmap",
+    scene = list(
+      xaxis = list(title = "Name", tickvals =  seq_along(name_levels), ticktext = name_levels),
+      yaxis = list(title = "Month", tickvals = seq_along(month_levels), ticktext = format(as.Date(month_levels), "%Y-%m")),
+      zaxis = list(title = "Count")
+    )
+  )
+fig
+
+
+```
+
