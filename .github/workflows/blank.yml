@@ -48,12 +48,6 @@ jobs:
             ), repos='https://cloud.r-project.org')
           "
 
-      - name: Confirm plotly is installed
-        run: |
-          Rscript -e "
-            .libPaths(Sys.getenv('R_LIBS_USER'));
-            if (!require('plotly')) stop('❌ plotly is not installed') else cat('✅ plotly is installed\n')
-          "
 
       - name: Render R Markdown
         run: |
