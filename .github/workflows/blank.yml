@@ -29,6 +29,13 @@ jobs:
         with:
           pandoc-version: 3.1.11
 
+      - name: Install rmarkdown (required to render .Rmd)
+        run: |
+          Rscript -e "
+            .libPaths(Sys.getenv('R_LIBS_USER'));
+            install.packages('rmarkdown', repos='https://cloud.r-project.org')
+          "
+
       - name: Render R Markdown
         run: |
           Rscript -e "
