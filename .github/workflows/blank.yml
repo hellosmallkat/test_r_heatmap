@@ -26,14 +26,32 @@ jobs:
         uses: r-lib/actions/setup-pandoc@v2
         with:
           pandoc-version: 3.1.11
-          
+
       - name: Install plotly dependencies
         run: |
-          Rscript -e ".libPaths(Sys.getenv('R_LIBS_USER')); install.packages(c('htmlwidgets', 'crosstalk', 'ggplot2', 'httr', 'jsonlite', 'curl'), repos='https://cloud.r-project.org')"
+          Rscript -e "
+            .libPaths(Sys.getenv('R_LIBS_USER'));
+            install.packages(c('htmlwidgets', 'crosstalk', 'ggplot2', 'httr', 'jsonlite', 'curl'), repos='https://cloud.r-project.org')
+          "
 
-      - name: Install required R packages
+      - name: Install plotly with error handling
         run: |
-          Rscript -e ".libPaths(Sys.getenv('R_LIBS_USER')); install.packages(c('rmarkdown', 'plotly', 'lubridate', 'akima', 'stringr', 'tidyr', 'dplyr'), repos='https://cloud.r-project.org')"
+          Rscript -e "
+            .libPaths(Sys.getenv('R_LIBS_USER'));
+            tryCatch({
+              install.packages('plotly', repos='https://cloud.r-project.org', verbose=TRUE)
+            }, error = function(e) {
+              cat('❌ plotly installation failed:', conditionMessage(e), '\n');
+              quit(status = 1)
+            })
+          "
+
+      - name: Install other required R packages
+        run: |
+          Rscript -e "
+            .libPaths(Sys.getenv('R_LIBS_USER'));
+            install.packages(c('rmarkdown', 'lubridate', 'akima', 'stringr', 'tidyr', 'dplyr'), repos='https://cloud.r-project.org')
+          "
 
       - name: List installed packages (for sanity check)
         run: |
