@@ -24,14 +24,12 @@ jobs:
 
       - name: Install required R packages
         run: |
-          Rscript -e "if (!requireNamespace('rmarkdown', quietly=TRUE)) install.packages('rmarkdown', repos='https://cloud.r-project.org')"
-          Rscript -e "if (!requireNamespace('plotly', quietly=TRUE)) install.packages('plotly', repos='https://cloud.r-project.org')"
-          Rscript -e "if (!requireNamespace('lubridate', quietly=TRUE)) install.packages('lubridate', repos='https://cloud.r-project.org')"
-          Rscript -e "if (!requireNamespace('akima', quietly=TRUE)) install.packages('akima', repos='https://cloud.r-project.org')"
-          Rscript -e "if (!requireNamespace('stringr', quietly=TRUE)) install.packages('stringr', repos='https://cloud.r-project.org')"
-          Rscript -e "if (!requireNamespace('tidyr', quietly=TRUE)) install.packages('tidyr', repos='https://cloud.r-project.org')"
-          Rscript -e "if (!requireNamespace('dplyr', quietly=TRUE)) install.packages('dplyr', repos='https://cloud.r-project.org')"
-          
+          Rscript -e "install.packages('remotes', repos = 'https://cloud.r-project.org')"
+          Rscript -e "remotes::install_cran(c('rmarkdown', 'plotly', 'lubridate', 'akima', 'stringr', 'tidyr', 'dplyr'))"
+      - name: Check if plotly is installed
+        run: |
+          Rscript -e "if (!require('plotly')) quit(status = 1) else print('plotly is installed')"
+
       - name: Show installed packages
         run: Rscript -e "print(installed.packages()[,1])"
 
