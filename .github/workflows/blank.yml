@@ -24,12 +24,17 @@ jobs:
 
       - name: Install required R packages
         run: |
-          Rscript -e '
-          required <- c("rmarkdown", "plotly", "lubridate", "akima", "stringr", "tidyr", "dplyr")
-          installed <- rownames(installed.packages())
-          to_install <- setdiff(required, installed)
-          if (length(to_install)) install.packages(to_install, repos = "https://cloud.r-project.org")
-          '
+          Rscript -e "if (!requireNamespace('rmarkdown', quietly=TRUE)) install.packages('rmarkdown', repos='https://cloud.r-project.org')"
+          Rscript -e "if (!requireNamespace('plotly', quietly=TRUE)) install.packages('plotly', repos='https://cloud.r-project.org')"
+          Rscript -e "if (!requireNamespace('lubridate', quietly=TRUE)) install.packages('lubridate', repos='https://cloud.r-project.org')"
+          Rscript -e "if (!requireNamespace('akima', quietly=TRUE)) install.packages('akima', repos='https://cloud.r-project.org')"
+          Rscript -e "if (!requireNamespace('stringr', quietly=TRUE)) install.packages('stringr', repos='https://cloud.r-project.org')"
+          Rscript -e "if (!requireNamespace('tidyr', quietly=TRUE)) install.packages('tidyr', repos='https://cloud.r-project.org')"
+          Rscript -e "if (!requireNamespace('dplyr', quietly=TRUE)) install.packages('dplyr', repos='https://cloud.r-project.org')"
+          
+      - name: Show installed packages
+        run: Rscript -e "print(installed.packages()[,1])"
+
 
       - name: Run R script
         run: Rscript -e "rmarkdown::render('3d_heatmap_with_gtihub.Rmd')"
