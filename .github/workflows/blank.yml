@@ -23,15 +23,17 @@ jobs:
 
       - name: Install required R packages
         run: |
-          Rscript -e "install.packages(c('rmarkdown', 'plotly', 'lubridate', 'akima', 'stringr', 'tidyr', 'dplyr'), repos = 'https://cloud.r-project.org')"
-
+            Rscript -e "install.packages(c('rmarkdown', 'plotly', 'lubridate', 'akima', 'stringr', 'tidyr', 'dplyr'), lib=Sys.getenv('R_LIBS_USER'), lib='/home/runner/work/_temp/Library', repos='https://cloud.r-project.org')"
+            ')"
+        
       - name: List installed packages (for sanity check)
         run: |
           Rscript -e "cat(installed.packages()[,1], sep='\n')"
 
       - name: Confirm plotly is installed
         run: |
-          Rscript -e "if (!require('plotly')) stop('❌ plotly is not installed') else cat('✅ plotly is installed\\n')"
+          Rscript -e ".libPaths(Sys.getenv('R_LIBS_USER')); if (!require('plotly')) stop('❌ plotly is not installed') else cat('✅ plotly is installed\n')"
+          "
 
       - name: Render R Markdown
         run: |
