@@ -29,23 +29,6 @@ jobs:
         with:
           pandoc-version: 3.1.11
 
-      - name: Install all required R packages
-        run: |
-          Rscript -e "
-            .libPaths(Sys.getenv('R_LIBS_USER'));
-            install.packages(c(
-              'plotly', 'htmlwidgets', 'crosstalk', 'ggplot2', 'httr', 'jsonlite', 'curl',
-              'rmarkdown', 'lubridate', 'akima', 'stringr', 'tidyr', 'dplyr'
-            ), repos='https://cloud.r-project.org')
-          "
-
-      - name: Confirm plotly is installed
-        run: |
-          Rscript -e "
-            .libPaths(Sys.getenv('R_LIBS_USER'));
-            if (!require('plotly')) stop('❌ plotly is not installed') else cat('✅ plotly is installed\n')
-          "
-
       - name: Render R Markdown
         run: |
           Rscript -e "
