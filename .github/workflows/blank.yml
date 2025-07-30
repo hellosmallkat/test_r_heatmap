@@ -22,9 +22,14 @@ jobs:
       - name: Set up Pandoc
         uses: r-lib/actions/setup-pandoc@v2  # ✅ This is the right way
 
-      - name: Install R packages
+      - name: Install required R packages
         run: |
-          Rscript -e 'install.packages(c("rmarkdown", "plotly", "lubridate", "akima", "stringr", "tidyr", "dplyr"), repos="https://cloud.r-project.org")'
+          Rscript -e '
+          required <- c("rmarkdown", "plotly", "lubridate", "akima", "stringr", "tidyr", "dplyr")
+          installed <- rownames(installed.packages())
+          to_install <- setdiff(required, installed)
+          if (length(to_install)) install.packages(to_install, repos = "https://cloud.r-project.org")
+          '
 
       - name: Run R script
         run: Rscript -e "rmarkdown::render('3d_heatmap_with_gtihub.Rmd')"
