@@ -1,5 +1,3 @@
-name: Render R Markdown Heatmap
-
 on:
   push:
     branches: [ "main" ]
@@ -10,6 +8,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      R_LIBS_USER: /home/runner/work/_temp/Library
+      TZ: UTC
+      _R_CHECK_SYSTEM_CLOCK_: FALSE
+      NOT_CRAN: true
 
     steps:
       - name: Checkout repository
@@ -23,17 +27,16 @@ jobs:
 
       - name: Install required R packages
         run: |
-            Rscript -e "install.packages(c('rmarkdown', 'plotly', 'lubridate', 'akima', 'stringr', 'tidyr', 'dplyr'), lib=Sys.getenv('R_LIBS_USER'), repos='https://cloud.r-project.org')"
-        
+          Rscript -e ".libPaths(Sys.getenv('R_LIBS_USER')); install.packages(c('rmarkdown', 'plotly', 'lubridate', 'akima', 'stringr', 'tidyr', 'dplyr'), repos='https://cloud.r-project.org')"
+
       - name: List installed packages (for sanity check)
         run: |
-          Rscript -e "cat(installed.packages()[,1], sep='\n')"
+          Rscript -e ".libPaths(Sys.getenv('R_LIBS_USER')); cat(installed.packages()[,1], sep='\n')"
 
       - name: Confirm plotly is installed
         run: |
           Rscript -e ".libPaths(Sys.getenv('R_LIBS_USER')); if (!require('plotly')) stop('❌ plotly is not installed') else cat('✅ plotly is installed\n')"
-          "
 
       - name: Render R Markdown
         run: |
-          Rscript -e "rmarkdown::render('3d_heatmap_with_gtihub.Rmd')"
+          Rscript -e ".libPaths(Sys.getenv('R_LIBS_USER')); rmarkdown::render('3d_heatmap_with_gtihub.Rmd')"
