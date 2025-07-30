@@ -24,6 +24,8 @@ jobs:
 
       - name: Set up Pandoc
         uses: r-lib/actions/setup-pandoc@v2
+        with:
+          pandoc-version: 3.1.11
 
       - name: Install required R packages
         run: |
