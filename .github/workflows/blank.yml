@@ -26,6 +26,11 @@ jobs:
         uses: r-lib/actions/setup-pandoc@v2
         with:
           pandoc-version: 3.1.11
+          
+      - name: Install plotly with verbose output
+        run: |
+          Rscript -e ".libPaths(Sys.getenv('R_LIBS_USER')); install.packages('plotly', repos='https://cloud.r-project.org', verbose=TRUE)"
+
 
       - name: Install required R packages
         run: |
