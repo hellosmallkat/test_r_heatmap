@@ -1,3 +1,5 @@
+name: Build and Render R Heatmap
+
 on:
   push:
     branches: [ "main" ]
@@ -8,7 +10,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     env:
       R_LIBS_USER: /home/runner/work/_temp/Library
       TZ: UTC
@@ -27,40 +28,36 @@ jobs:
         with:
           pandoc-version: 3.1.11
 
-      - name: Install plotly dependencies
+      - name: Install plotly and dependencies
         run: |
           Rscript -e "
             .libPaths(Sys.getenv('R_LIBS_USER'));
-            install.packages(c('htmlwidgets', 'crosstalk', 'ggplot2', 'httr', 'jsonlite', 'curl'), repos='https://cloud.r-project.org')
-          "
-
-      - name: Install plotly with error handling
-        run: |
-          Rscript -e "
-            .libPaths(Sys.getenv('R_LIBS_USER'));
-            tryCatch({
-              install.packages('plotly', repos='https://cloud.r-project.org', verbose=TRUE)
-            }, error = function(e) {
-              cat('❌ plotly installation failed:', conditionMessage(e), '\n');
-              quit(status = 1)
-            })
+            install.packages(c(
+              'plotly', 'htmlwidgets', 'crosstalk', 'ggplot2',
+              'httr', 'jsonlite', 'curl'
+            ), repos='https://cloud.r-project.org')
           "
 
       - name: Install other required R packages
         run: |
           Rscript -e "
             .libPaths(Sys.getenv('R_LIBS_USER'));
-            install.packages(c('rmarkdown', 'lubridate', 'akima', 'stringr', 'tidyr', 'dplyr'), repos='https://cloud.r-project.org')
+            install.packages(c(
+              'rmarkdown', 'lubridate', 'akima', 'stringr',
+              'tidyr', 'dplyr'
+            ), repos='https://cloud.r-project.org')
           "
-
-      - name: List installed packages (for sanity check)
-        run: |
-          Rscript -e ".libPaths(Sys.getenv('R_LIBS_USER')); cat(installed.packages()[,1], sep='\n')"
 
       - name: Confirm plotly is installed
         run: |
-          Rscript -e ".libPaths(Sys.getenv('R_LIBS_USER')); if (!require('plotly')) stop('❌ plotly is not installed') else cat('✅ plotly is installed\n')"
+          Rscript -e "
+            .libPaths(Sys.getenv('R_LIBS_USER'));
+            if (!require('plotly')) stop('❌ plotly is not installed') else cat('✅ plotly is installed\n')
+          "
 
       - name: Render R Markdown
         run: |
-          Rscript -e ".libPaths(Sys.getenv('R_LIBS_USER')); rmarkdown::render('3d_heatmap_with_gtihub.Rmd')"
+          Rscript -e "
+            .libPaths(Sys.getenv('R_LIBS_USER'));
+            rmarkdown::render('3d_heatmap_with_gtihub.Rmd')
+          "
