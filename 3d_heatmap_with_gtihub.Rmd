@@ -40,7 +40,7 @@ library(dplyr)
 ```
 
 ```{r}
-data <- read.csv("C:\\Users\\Kat\\Desktop\\Fun\\Scraping\\fake_healthcare_dataset.csv")
+data <- read.csv("fake_healthcare_dataset.csv")
 ```
 
 ```{r}
