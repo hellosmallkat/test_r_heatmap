@@ -48,4 +48,3 @@ jobs:
           git add 3d_heatmap_with_gtihub.html
           git commit -m "Add rendered HTML output"
           git push https://x-access-token:${GH_PAT}@github.com/${{ github.repository }} rendered-output
-
