@@ -9,8 +9,14 @@ jobs:
   render-and-push:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write  # Required to push using GITHUB_TOKEN
+
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      TZ: UTC
+      _R_CHECK_SYSTEM_CLOCK_: FALSE
+      NOT_CRAN: true
 
     steps:
       - name: Checkout repository
@@ -40,11 +46,11 @@ jobs:
 
       - name: Push rendered HTML to new branch
         env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git checkout -b rendered-output
           git add 3d_heatmap_with_gtihub.html
           git commit -m "Add rendered HTML output"
-          git push https://x-access-token:${GH_PAT}@github.com/${{ github.repository }} rendered-output
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} rendered-output
