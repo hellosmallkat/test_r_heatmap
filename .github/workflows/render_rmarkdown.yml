@@ -1,6 +1,8 @@
 name: Render R Markdown and Push to New Branch
 
-on:
+on: 
+  schedule:
+      - cron: '0 * * * *'  # Runs at the top of every hour (UTC)
   push:
     branches:
       - main
