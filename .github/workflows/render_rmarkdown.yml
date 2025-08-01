@@ -50,7 +50,12 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git checkout -b rendered-output
+          
+          # Generate a timestamped branch name
+          BRANCH_NAME="rendered-output-$(date -u +'%Y%m%d-%H%M%S')"
+          
+          git checkout -b "$BRANCH_NAME"
           git add 3d_heatmap_with_gtihub.html
           git commit -m "Add rendered HTML output"
-          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} rendered-output
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} "$BRANCH_NAME"
+
