@@ -52,20 +52,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git fetch --all
+          # List remote rendered-output branches, sorted oldest → newest
+          BRANCHES=$(git ls-remote --heads origin "rendered-output-*" \
+            | awk '{print $2}' \
+            | sed 's|refs/heads/||' \
+            | sort)
 
-          # Get list of rendered-output branches sorted oldest → newest
-          BRANCHES=$(git branch -r | grep 'origin/rendered-output-' | sed 's|origin/||' | sort)
-
-          OLDEST_BRANCH=$(echo "$BRANCHES" | head -n 1)
-          BRANCH_COUNT=$(echo "$BRANCHES" | wc -l)
+          BRANCH_COUNT=$(echo "$BRANCHES" | wc -l | tr -d ' ')
 
           if [ "$BRANCH_COUNT" -gt 1 ]; then
+            OLDEST_BRANCH=$(echo "$BRANCHES" | head -n 1)
             echo "Deleting oldest branch: $OLDEST_BRANCH"
             git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} --delete "$OLDEST_BRANCH"
           else
-            echo "No old branch to delete"
+            echo "No old rendered-output branch to delete"
           fi
+
 
       - name: Push rendered HTML to new branch
         env:
